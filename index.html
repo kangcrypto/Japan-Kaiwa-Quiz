@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaiwa Quiz - Minna no Nihongo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>会話クイズ</h1>
+            <p class="subtitle">Minna no Nihongo Style Quiz</p>
+        </header>
+
+        <div id="chapter-select" class="screen active">
+            <h2>Select Chapter (課)</h2>
+            <div class="chapter-grid" id="chapter-grid"></div>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <button id="back-btn" class="btn secondary">← Back</button>
+                <span id="chapter-info" class="chapter-badge"></span>
+                <span id="score-display"></span>
+            </div>
+
+            <div class="question-card">
+                <div class="question-number" id="question-number"></div>
+                <div class="question-type" id="question-type"></div>
+                <div class="question-text" id="question-text"></div>
+
+                <button id="furigana-btn" class="btn furigana-btn hidden">
+                    <span class="furigana-icon">あ</span> Show Furigana
+                </button>
+
+                <div id="readings-display" class="readings-display hidden"></div>
+
+                <div id="dialogue-context" class="dialogue-context hidden">
+                    <div class="dialogue-label">会話 (Dialogue)</div>
+                    <div id="dialogue-content"></div>
+                </div>
+
+                <div class="options-container" id="options-container"></div>
+
+                <div class="input-area hidden" id="input-area">
+                    <input type="text" id="answer-input" placeholder="Type your answer..." autocomplete="off">
+                    <button id="submit-typing" class="btn primary">Submit</button>
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+
+                <button id="next-btn" class="btn primary hidden">Next →</button>
+            </div>
+
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <div class="result-card">
+                <h2>Quiz Complete!</h2>
+                <div class="score-circle">
+                    <span id="final-score"></span>
+                </div>
+                <p id="result-message"></p>
+                <button id="retry-btn" class="btn primary">Retry Same Chapter</button>
+                <button id="home-btn" class="btn secondary">Back to Chapters</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="readings.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
