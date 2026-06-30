@@ -100,15 +100,42 @@
     if (!text || typeof kanjiReadings === "undefined") return [];
     const found = [];
     const seen = new Set();
+    // Track positions already matched to avoid overlapping matches
+    // (e.g., if "日本" matches, don't also match "日" or "本" within it)
+    const positions = []; // ranges already covered
+    const isCovered = (start, end) =>
+      positions.some(([s, e]) => start < e && end > s);
     // Match longest kanji first to avoid partial matches
     const keys = Object.keys(kanjiReadings).sort((a, b) => b.length - a.length);
     for (const k of keys) {
-      if (text.includes(k) && !seen.has(k)) {
-        found.push({ kanji: k, reading: kanjiReadings[k] });
-        seen.add(k);
+      if (seen.has(k)) continue;
+      let from = 0;
+      let idx;
+      while ((idx = text.indexOf(k, from)) !== -1) {
+        const end = idx + k.length;
+        if (!isCovered(idx, end)) {
+          found.push({ kanji: k, reading: kanjiReadings[k] });
+          seen.add(k);
+          positions.push([idx, end]);
+          break; // one occurrence per key is enough
+        }
+        from = end;
       }
     }
     return found;
+  }
+
+  // Get readings from ALL fields of a question (text, dialogue, hint, options)
+  function getQuestionReadings(q) {
+    const parts = [q.text || "", q.hint || ""];
+    if (q.dialogue) {
+      Object.values(q.dialogue).forEach((line) => parts.push(line));
+    }
+    if (Array.isArray(q.options)) {
+      q.options.forEach((opt) => parts.push(opt));
+    }
+    const combined = parts.join(" ");
+    return getReadings(combined);
   }
 
   function renderReadings(readings) {
@@ -208,8 +235,8 @@
     // Question text
     els.questionText.textContent = q.text || "";
 
-    // Furigana button (only if kanji in text)
-    const readings = getReadings(q.text || "");
+    // Furigana button (kalo ada kanji anywhere di question: text, dialogue, hint, options)
+    const readings = getQuestionReadings(q);
     if (readings.length > 0) {
       els.furiganaBtn.classList.remove("hidden");
       els.furiganaBtn.classList.remove("active");
@@ -265,6 +292,14 @@
     setTimeout(() => els.answerInput.focus(), 50);
     if (q.hint) {
       els.questionText.textContent = `${q.text}\n💡 Hint: ${q.hint}`;
+    }
+    // Auto-render furigana for fill too, since kanji often appears in hint
+    const readings = getQuestionReadings(q);
+    if (readings.length > 0) {
+      els.furiganaBtn.classList.remove("hidden");
+      els.furiganaBtn.classList.remove("active");
+      els.readingsDisplay.classList.add("hidden");
+      state.furiganaShown = false;
     }
     // Remove old listener by replacing element
     const newSubmit = els.submitTyping.cloneNode(true);
@@ -370,7 +405,7 @@
     if (!q) return;
     if (!state.furiganaShown) {
       state.furiganaShown = true;
-      const readings = getReadings(q.text || "");
+      const readings = getQuestionReadings(q);
       renderReadings(readings);
       els.furiganaBtn.classList.add("active");
     } else {
